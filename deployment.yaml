@@ -25,7 +25,7 @@ spec:
       containers:
         - name: portal-c
           # Jenkins overwrites this line with the real tag it built
-          image: 192.168.10.23:5000/portal-c:staging-d8d5ef0
+          image: 192.168.10.23:5000/portal-c:staging-df08c93
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
