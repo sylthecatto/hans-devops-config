@@ -38,9 +38,6 @@ spec:
                 secretKeyRef:
                   name: portal-c-secret
                   key: API_KEY
-          volumeMounts:
-            - name: config
-              mountPath: /app/config
           # liveness: is the process alive
           livenessProbe:
             httpGet:
@@ -62,7 +59,3 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
-      volumes:
-        - name: config
-          configMap:
-            name: portal-c-config-staging
