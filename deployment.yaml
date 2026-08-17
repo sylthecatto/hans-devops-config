@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-c-production
+  namespace: exam-3
+  labels:
+    app: portal-c
+    env: production
+spec:
+  replicas: 2
+  # only manage pods matching these exact labels
+  selector:
+    matchLabels:
+      app: portal-c
+      env: production
+  template:
+    metadata:
+      labels:
+        app: portal-c
+        env: production
+    spec:
+      # lets the pod pull from the private registry
+      imagePullSecrets:
+        - name: registry-cred
+      containers:
+        - name: portal-c
+          # Jenkins overwrites this line with the real tag it built
+          image: 192.168.10.23:5000/portal-c:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: APP_ENV
+              value: production
+            # pulled from the Secret we created, not typed here
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: portal-c-secret
+                  key: API_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          # liveness: is the process alive
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          # readiness: can it actually serve traffic right now
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: portal-c-config-production
